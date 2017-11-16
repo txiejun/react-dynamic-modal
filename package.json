@@ -11,6 +11,13 @@
     "url": "https://github.com/xue2han/react-dynamic-modal.git"
   },
   "author": "Xue Han",
+  "contributors":[
+    {
+      "name" : "txiejun",
+      "email" : "txiejun@126.com",
+      "url" : "https://github.com/txiejun"
+    }
+  ],
   "license": "MIT",
   "tags": [
     "react",
