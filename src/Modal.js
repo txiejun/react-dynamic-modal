@@ -43,9 +43,16 @@ let onClose;
 export class Modal extends Component{
    constructor(props){
       super(props);
+      this.isModal = true;
       this.state = {
          open : false
       }
+       const transitionTimeMS = this.getTransitionDuration();
+       onClose = (callback) => {
+           this.setState({open: false}, () => {
+               this.closeTimer = setTimeout(callback, transitionTimeMS);
+           });
+       };
    }
    close(){
        if(!this.props.onRequestClose || this.props.onRequestClose()){
@@ -53,21 +60,22 @@ export class Modal extends Component{
        }
    }
    handleKeyDown(event){
-      if (event.keyCode == 27 /*esc*/) this.close();
+      if (event.keyCode == 27 /*esc*/){
+          this.close();
+      }
    }
    componentDidMount(){
-      const transitionTimeMS = this.getTransitionDuration();
       setTimeout(() => this.setState({open : true}),0);
-      onClose = (callback) => {
-         this.setState({open: false}, () => {
-           this.closeTimer = setTimeout(callback, transitionTimeMS);
-         });
-      };
    }
    componentWillUnmount(){
-      onClose = null;
+       onClose = null;
       clearTimeout(this.closeTimer);
    }
+
+    /**
+     * 获得缓动时间
+     * @returns {number}
+     */
    getTransitionDuration(){
      const { effect } = this.props;
      if(!effect.transition){
@@ -76,7 +84,7 @@ export class Modal extends Component{
      return effect.transition.duration || defaultTransition.duration;
    }
    render(){
-      const {style,effect} = this.props;
+      const {style,effect, isModal} = this.props;
       const { open } = this.state;
 
       let transition = effect.transition;
@@ -88,51 +96,112 @@ export class Modal extends Component{
       let transition_style = {
         	'transition': transition.property+' '+(transition.duration / 1000) + 's'+' '+transition.timingfunction
       };
+       if(isModal!=undefined){
+           this.isModal = isModal;
+       }
+      if(this.isModal){
+          return (
+              <div
+                  ref="overlay"
+                  style={prefix(Assign({},defaultStyles.overlay,style ? (style.overlay ? style.overlay : {}) : {},{ transition: 'opacity '+(transition.duration / 1000) + 's'+' linear',opacity: open ? 1 : 0}))}
+                  onClick={this.close.bind(this)}>
 
-      return (
-          <div
-            ref="overlay"
-            style={prefix(Assign({},defaultStyles.overlay,style ? (style.overlay ? style.overlay : {}) : {},{ transition: 'opacity '+(transition.duration / 1000) + 's'+' linear',opacity: open ? 1 : 0}))}
-            onClick={this.close.bind(this)}>
-
-            <div
-              ref="content"
-              style={prefix(Assign({},defaultStyles.content,style ? (style.content ? style.content : {}) : {},transition_style,open ? effect.end : effect.begin))}
-              onClick={stopPropagation}
-              onKeyDown={this.handleKeyDown.bind(this)}>
-              {this.props.children}
-            </div>
-          </div>
-      );
+                  <div
+                      ref="content"
+                      style={prefix(Assign({},defaultStyles.content,style ? (style.content ? style.content : {}) : {},transition_style,open ? effect.end : effect.begin))}
+                      onClick={stopPropagation}
+                      onKeyDown={this.handleKeyDown.bind(this)}>
+                      {this.props.children}
+                  </div>
+              </div>
+          );
+      }
+      else{
+          return (
+              <div
+                  ref="content"
+                  style={prefix(Assign({},defaultStyles.content,style ? (style.content ? style.content : {}) : {},transition_style,open ? effect.end : effect.begin))}
+                  onClick={stopPropagation}
+                  onKeyDown={this.handleKeyDown.bind(this)}>
+                  {this.props.children}
+              </div>
+          );
+      }
    }
 }
 
-var node;
-var modals = [];
+let modals = [];
+let _modalUid = 0;
 
-const renderModal = () => {
-   if(modals.length == 0)
-      return;
-
-   const component = modals.shift();
-   if(!node){
-      node = document.createElement('div');
-      document.body.appendChild(node);
-   }
-   ReactDOM.render(component,node);
+const getUID = ()=>{
+    if(_modalUid >= Number.MAX_VALUE){
+        _modalUid = 0;
+    }
+    return ++_modalUid;
 }
 
 export const ModalManager = {
-    open(component){
-       modals.push(component);
-       if(modals.length == 1){ // render the modal only if there is no other showing modals
-          renderModal();
-       }
+    /**
+     * 打开一个弹窗
+     * @param component
+     * @param container
+     * @returns {number} 返回弹窗id
+     */
+    open(component, modalRoot=null){
+        debugger
+        let modalId = -1;
+        if(component){
+            modalId = getUID();
+            let container = document.createElement('div');
+            container.id = "modalContainer_"+modalId;
+            if(modalRoot){
+                modalRoot.appendChild(container);
+            }
+            else{
+                document.body.appendChild(container);
+            }
+            ReactDOM.render(component,container, ()=>{
+                modals.push({modalId:modalId, component:component, container:container, onClose:onClose});
+            });
+        }
+        return modalId;
     },
-    close(){
-       onClose && onClose(() => {
-         ReactDOM.unmountComponentAtNode(node);
-         renderModal();// render the other modals which are waiting.
-       });
+
+    /**
+     * 关闭一个弹窗 如果没传递id 默认关闭最上面一个
+     * @param modalId 弹窗id
+     */
+    close(modalId){
+        if(modals.length>0){
+            let modalInfo = null;
+            if(modalId!=undefined && !isNaN(modalId)){
+                for(let i=0;i<modals.length;i++){
+                    let info = modals[i];
+                    if(info.modalId == modalId){
+                        modalInfo = info;
+                        modals.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            else{
+                modalInfo = modals.pop();
+            }
+            if(modalInfo){
+                if(modalInfo.onClose){
+                    modalInfo.onClose(() => {
+                        if(modalInfo.container){
+                            ReactDOM.unmountComponentAtNode(modalInfo.container);
+                            if(modalInfo.container.parentNode){
+                                modalInfo.container.parentNode.removeChild(modalInfo.container);
+                            }
+                            modalInfo.component = null;
+                            modalInfo.container = null;
+                            modalInfo.onClose = null;
+                        }
+                    });
+                }
+            }
+        }
     }
 }

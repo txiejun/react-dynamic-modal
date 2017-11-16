@@ -1,15 +1,17 @@
+const path = require('path');
+
 module.exports = {
   entry : './src/app.jsx',
   output: {
     filename: 'main.js',
-    path: 'build/',
+    path: path.join(__dirname, 'build/'),
   },
   module: {
     loaders: [
-      { test: /\.jsx?$/, loader: 'babel' }
+      { test: /\.jsx?$/, loader: 'babel-loader' }
     ]
   },
   resolve:{
-   	  extensions : ["",".webpack.js", ".web.js", ".jsx",".js"]
+   	  extensions : [".webpack.js", ".web.js", ".jsx",".js"]
   },
 };

@@ -34,6 +34,7 @@
     "babel-loader": "^6.2.0",
     "babel-preset-es2015": "^6.1.18",
     "babel-preset-react": "^6.1.18",
+    "babel-runtime": "^6.26.0",
     "webpack": "^1.12.9"
   },
   "peerDependencies": {
@@ -42,6 +43,8 @@
   },
   "dependencies": {
     "lodash.assign": "^3.2.0",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1",
     "react-prefixr": "^0.1.0"
   }
 }

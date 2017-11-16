@@ -5,9 +5,10 @@ import { Modal,ModalManager,Effect} from '../../lib';
 
 class MyModal extends Component{
    render(){
-      const {content,effect} = this.props;
+      const {content,effect, onOk, isModal} = this.props;
       return (
         <Modal
+            isModal={isModal}
           effect={effect}
           onRequestClose={() => true}
           >
@@ -18,8 +19,14 @@ class MyModal extends Component{
               <h4>{content}</h4>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-default" onClick={ModalManager.close}>Close</button>
-              <button type="button" className="btn btn-primary" onClick={ModalManager.close}>OK</button>
+              <button type="button" className="btn btn-default" onClick={()=>{
+                  ModalManager.close();
+              }}>Close</button>
+              <button type="button" className="btn btn-primary" onClick={()=>{
+                  if(onOk){
+                      onOk();
+                  }
+              }}>OK</button>
             </div>
         </Modal>
       );
@@ -29,9 +36,26 @@ class MyModal extends Component{
 
 
 class App extends Component{
+    constructor(props) {
+        super(props);
+        this.id1 = -1;
+        this.id2 = -1;
+
+    }
+
+    open3(){
+        ModalManager.open(<MyModal onOk={()=>{
+            ModalManager.close(this.id1);
+        }}content="this is the third modal" effect={Effect.RotateFromLeft3D}/>);
+    }
+
+    open2(){
+        this.id2 = ModalManager.open(<MyModal onOk={this.open3.bind(this)} content="this is the second modal" effect={Effect.SlideFromRight}/>);
+    }
+
    openModal(effect){
       var content = this.refs.input.value;
-      ModalManager.open(<MyModal content={content} effect={effect}/>);
+      this.id1 = ModalManager.open(<MyModal isModal={false} onOk={this.open2.bind(this)} content={content} effect={effect}/>, document.getElementById('modalroot'));
    }
    render(){
 
@@ -58,10 +82,10 @@ class App extends Component{
                         <textarea rows="3" defaultValue="There are many possibilities for modal overlays to appear. Here are some modern ways of showing them using CSS transitions and animations." className="form-control" ref='input' />
                     </div>
                     <div>
-                     { Object.keys(effects).map( label => {
+                     { Object.keys(effects).map( (label, index) => {
                         const effect = effects[label];
                         return (
-                          <button className="btn btn-primary" role="button" type="button" style={{'float' : 'left',margin:5}} onClick={() => this.openModal(effect)}>{label}</button>
+                          <button key={index} className="btn btn-primary" role="button" type="button" style={{'float' : 'left',margin:5}} onClick={() => this.openModal(effect)}>{label}</button>
                         );
                      })}
                     </div>
