@@ -1,6 +1,6 @@
 {
   "name": "react-dynamic-modal-v2",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Dynamically generated modal dialog component for ReactJS",
   "main": "./lib",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xue2han/react-dynamic-modal.git"
+    "url": "https://github.com/txiejun/react-dynamic-modal-v2.git"
   },
   "author": "Xue Han",
   "contributors":[
