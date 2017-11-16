@@ -1,6 +1,6 @@
 # react-dynamic-modal
 
-[![Join the chat at https://gitter.im/xue2han/react-dynamic-modal](https://badges.gitter.im/xue2han/react-dynamic-modal.svg)](https://gitter.im/xue2han/react-dynamic-modal?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://github.com/txiejun/react-dynamic-modal-v2](https://badges.gitter.im/xue2han/react-dynamic-modal.svg)](https://gitter.im/xue2han/react-dynamic-modal?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Dynamically generated modal dialog component for ReactJS.
 It is stateless and can be rendered only when needed.
@@ -9,17 +9,17 @@ It is stateless and can be rendered only when needed.
 Most of modal dialog components for React have a common shortcoming : you have to take care of the state (open or closed) for the modal,and you have to render it in your component event if you don't need it to be shown.So why don't we make it stateless and render it only when we need it to be shown ? this is how react-dynamic-modal comes.
 
 # Demos
-* http://xue2han.github.io/react-dynamic-modal
+* http://txiejun.r1game.com/react-dynamic-modal-v2/
 
 ## Install
-`npm install --save react-dynamic-modal`
+`npm install --save react-dynamic-modal-v2`
 
 ## Usage
 
 ```js
 import React,{Component} from 'react';
 import ReactDOM from 'react-dom';
-import { Modal,ModalManager,Effect} from 'react-dynamic-modal';
+import { Modal,ModalManager,Effect} from 'react-dynamic-modal-v2';
 
 class MyModal extends Component{
    render(){
