@@ -148,7 +148,6 @@ export const ModalManager = {
      * @returns {number} 返回弹窗id
      */
     open(component, modalRoot=null){
-        debugger
         let modalId = -1;
         if(component){
             modalId = getUID();
