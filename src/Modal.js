@@ -47,6 +47,7 @@ export class Modal extends Component{
       this.state = {
          open : false
       }
+
        const transitionTimeMS = this.getTransitionDuration();
        onClose = (callback) => {
            this.setState({open: false}, () => {
@@ -159,9 +160,10 @@ export const ModalManager = {
             else{
                 document.body.appendChild(container);
             }
-            ReactDOM.render(component,container, ()=>{
+            let modalInstance = ReactDOM.render(component,container, ()=>{
                 modals.push({modalId:modalId, component:component, container:container, onClose:onClose});
             });
+            modalInstance.__modalId = modalId;
         }
         return modalId;
     },
