@@ -49,11 +49,12 @@ export class Modal extends Component{
       }
 
        const transitionTimeMS = this.getTransitionDuration();
-       onClose = (callback) => {
+       this.onClose = onClose = (callback) => {
            this.setState({open: false}, () => {
                this.closeTimer = setTimeout(callback, transitionTimeMS);
            });
        };
+
    }
    close(){
        if(!this.props.onRequestClose || this.props.onRequestClose()){
@@ -70,6 +71,7 @@ export class Modal extends Component{
    }
    componentWillUnmount(){
        onClose = null;
+       this.onClose = null;
       clearTimeout(this.closeTimer);
    }
 
@@ -149,23 +151,25 @@ export const ModalManager = {
      * @returns {number} 返回弹窗id
      */
     open(component, modalRoot=null){
-        let modalId = -1;
         if(component){
-            modalId = getUID();
             let container = document.createElement('div');
-            container.id = "modalContainer_"+modalId;
             if(modalRoot){
                 modalRoot.appendChild(container);
             }
             else{
                 document.body.appendChild(container);
             }
+            let modalId = getUID();
             let modalInstance = ReactDOM.render(component,container, ()=>{
-                modals.push({modalId:modalId, component:component, container:container, onClose:onClose});
+                modals.push({modalId:modalId, modalInstance:modalInstance, container:container, onClose:onClose});
             });
+
             modalInstance.__modalId = modalId;
+            container.id = "modalContainer_"+modalId;
+
+            return modalId;
         }
-        return modalId;
+        return -1;
     },
 
     /**
@@ -196,9 +200,8 @@ export const ModalManager = {
                             if(modalInfo.container.parentNode){
                                 modalInfo.container.parentNode.removeChild(modalInfo.container);
                             }
-                            modalInfo.component = null;
+                            modalInfo.modalInstance = null;
                             modalInfo.container = null;
-                            modalInfo.onClose = null;
                         }
                     });
                 }
